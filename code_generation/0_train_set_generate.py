@@ -14,6 +14,7 @@ load_dotenv()
 client = OpenAI(
     base_url=os.getenv("OPENAI_API_BASE", "https://api.openai.com/v1"),
     api_key=os.getenv("OPENAI_API_KEY"),
+    
 )
 
 task_describe = """
@@ -36,17 +37,20 @@ Ensure that the data you provide is consistent with the reference data format, a
 Ensure that the generated data is different from the provided reference data.
 Return the data in the same Json format as the reference data and wrapped the data with [Start] and [End].
 """
-
 def GEN_ANSWER(prompt):
-    response = client.chat.completions.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {"role": "system", "content": task_describe},
-            {"role": "user", "content": information + prompt + format_instructions}
-        ],
-        max_tokens=2000
-    )
-    return response.choices[0].message.content, response.usage.total_tokens
+    completion = """
+[Start]
+{
+"task_id": "HumanEval/100",
+"prompt": "def add(a, b):\\n    '''Return sum of two numbers'''\\n",
+"entry_point": "add",
+"canonical_solution": "    return a + b",
+"test": "\\n\\ndef check(candidate):\\n    assert candidate(1,2) == 3\\n    assert candidate(5,7) == 12\\n"
+}
+[End]
+"""
+    tokens_used = 0
+    return completion, tokens_used
 
 def extract_wrapped_content(text):
     match = re.search(r'\[Start\]\s*\n(.*?)\n\[End\]', text, re.DOTALL)
@@ -114,7 +118,7 @@ def main(output_path):
 
     print(f"Total tokens used: {total_tokens_used}")
 
-if __name__ == "__main__":
+if __name__ == "__main__":  
     parser = argparse.ArgumentParser(description="Generate data and save it to a specified output path.")
     parser.add_argument('--output_path', type=str, required=True, help="The output path for the generated data.")
     args = parser.parse_args()

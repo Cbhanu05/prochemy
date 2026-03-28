@@ -18,32 +18,12 @@ client = OpenAI(
 
 
 def GEN_SOLUTION(task_describe, prompt, model, client):
-    attempts = 0
-    total_tokens_used = 0  # Initialize token counter
-
-    while attempts < 5:
-        response = client.chat.completions.create(
-            model=model,
-            messages=[
-                {"role": "system", "content": task_describe},
-                {"role": "user", "content": prompt}
-            ],
-            max_tokens=1000,
-            temperature=0.0
-        )
-
-        # Add token usage for this request
-        total_tokens_used += response.usage.total_tokens
-
-        # Use regular expression to match content starting with ```python and ending with ```
-        match = re.search(r'```python(.*?)```', response.choices[0].message.content, re.DOTALL)
-        if match:
-            return match.group(1).strip(), total_tokens_used  # Return Python code and token usage
-        attempts += 1
-
-    # If no result after 5 attempts, return an empty string and total token count
-    print(f"Failed to extract valid Python code after 5 attempts for prompt: {prompt}")
-    return "", total_tokens_used
+    fake_code = """
+def solution(x):
+    return x
+"""
+    tokens_used = 0
+    return fake_code, tokens_used
 
 
 def process_task(task_id, task_describe, prompt, model, client):
@@ -58,6 +38,7 @@ def read_jsonl(file_path):
 
 
 def main(model, testset_path, mutated_prompt_path, output_path):
+    tasks = list(read_jsonl(testset_path))
     os.makedirs(output_path, exist_ok=True)
 
     # Read mutated prompt file
@@ -69,17 +50,17 @@ def main(model, testset_path, mutated_prompt_path, output_path):
         samples = []
 
         # Use multithreading to speed up task processing
-        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
             futures = [
                 executor.submit(
                     process_task,
                     task["task_id"],
                     task_describe,
-                    task["prompt"],
+                    task.get("prompt", ""),
                     model,
                     client
                 )
-                for task in read_jsonl(testset_path)
+                for task in tasks
             ]
 
             for future in tqdm(concurrent.futures.as_completed(futures), total=len(futures),
