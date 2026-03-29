@@ -1,5 +1,12 @@
 from models.ollama_client import call_model
 
+def clean_code(output):
+    # remove markdown ``` blocks
+    if "```" in output:
+        output = output.split("```")[1]
+        output = output.replace("python", "")
+    return output.strip()
+
 def generate_code(problem, prompt):
     full_prompt = f"""
 You are an expert Python programmer.
@@ -12,4 +19,6 @@ Problem:
 Return ONLY valid Python code. No explanation.
 """
 
-    return call_model("deepseek-coder:6.7b", full_prompt)
+    raw_output = call_model("deepseek-coder:6.7b", full_prompt)
+
+    return clean_code(raw_output)
