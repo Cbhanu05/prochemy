@@ -16,7 +16,7 @@ def run_pipeline(problem, iterations=3):
         code = generate_code(problem, prompt)
 
         # 2. Run
-        passed, score, error = run_code(code)
+        passed, score, error = run_code(code, problem)
 
         # 3. Save step
         history.append({
