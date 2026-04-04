@@ -2,26 +2,31 @@ from services.generator import generate_code
 from services.runner import run_code
 from services.evaluator import evaluate_code
 from services.refiner import refine_prompt
+from services.classifier import is_code_prompt
 
 
 def run_pipeline(problem, iterations=3):
-    prompt = "Write a Python function to solve the problem."
-
+    prompt = "Solve the user's request clearly and correctly."
     history = []
+
+    code_mode = is_code_prompt(problem)
 
     for i in range(iterations):
         print(f"\n--- Iteration {i+1} ---")
 
-        # 1. Generate
-        code = generate_code(problem, prompt)
+        response = generate_code(problem, prompt)
 
-        # 2. Run
-        passed, score, error = run_code(code, problem)
+        passed = True
+        score = 1.0
+        error = "No execution needed"
 
-        # 3. Save step
+        # only for coding tasks
+        if code_mode:
+            passed, score, error = run_code(response)
+
         history.append({
             "iteration": i + 1,
-            "code": code,
+            "response": response,
             "passed": passed,
             "score": score,
             "error": error
@@ -30,18 +35,17 @@ def run_pipeline(problem, iterations=3):
         if passed:
             return {
                 "success": True,
-                "final_code": code,
-                "history": history
+                "final_output": response,
+                "history": history,
+                "mode": "code" if code_mode else "general"
             }
 
-        # 4. Evaluate
-        feedback = evaluate_code(problem, code, error)
-
-        # 5. Refine prompt
+        feedback = evaluate_code(problem, response, error)
         prompt = refine_prompt(prompt, feedback)
 
     return {
         "success": False,
-        "final_code": code,
-        "history": history
+        "final_output": response,
+        "history": history,
+        "mode": "code" if code_mode else "general"
     }
