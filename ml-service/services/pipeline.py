@@ -9,7 +9,9 @@ def run_pipeline(problem, iterations=3):
     prompt = "Solve the user's request clearly and correctly."
     history = []
 
-    code_mode = is_code_prompt(problem)
+    code_mode = is_code_prompt(problem) 
+    if not code_mode:
+        iterations = 1
 
     for i in range(iterations):
         print(f"\n--- Iteration {i+1} ---")
