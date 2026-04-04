@@ -4,25 +4,36 @@ def run_code(code):
 
         exec(code, {}, local_env)
 
-        # get all functions defined
         functions = [v for v in local_env.values() if callable(v)]
 
         if not functions:
-            return False, "No function found"
+            return False, 0, "No function found"
 
-        func = functions[0]  # take first function
+        func = functions[0]
 
-        # simple test (can expand later)
-        try:
-            result = func(2, 3)
+        tests = [
+            ((2, 3), 5),
+            ((10, 20), 30),
+            ((-1, 1), 0),
+        ]
 
-            if result == 5:
-                return True, "Passed"
-            else:
-                return False, f"Wrong output: got {result}, expected 5"
+        passed_count = 0
+        total = len(tests)
 
-        except Exception as e:
-            return False, f"Runtime error: {str(e)}"
+        for inputs, expected in tests:
+            try:
+                result = func(*inputs)
+                if result == expected:
+                    passed_count += 1
+            except:
+                continue
+
+        score = passed_count / total
+
+        if score == 1:
+            return True, score, "All tests passed"
+        else:
+            return False, score, f"{passed_count}/{total} tests passed"
 
     except Exception as e:
-        return False, str(e)
+        return False, 0, str(e)

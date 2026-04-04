@@ -1,5 +1,6 @@
 from models.ollama_client import call_model
 
+
 def evaluate_code(problem, code, error):
     prompt = f"""
 You are a code evaluator.
@@ -10,7 +11,8 @@ Problem:
 Generated Code:
 {code}
 
-Error =  "Expected add(2,3)=5 but got wrong result"
+Execution Feedback:
+{error}
 
 Explain clearly:
 1. Why it failed
