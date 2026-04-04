@@ -19,6 +19,6 @@ Problem:
 Return ONLY valid Python code. No explanation.
 """
 
-    raw_output = call_model("deepseek-coder:6.7b", full_prompt)
+    raw_output = call_model("qwen2.5:3b", full_prompt)
 
     return clean_code(raw_output)
