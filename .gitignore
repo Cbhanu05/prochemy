@@ -14,3 +14,8 @@ data/
 # OS junk
 .DS_Store
 Thumbs.db
+
+# Phase 3 generated datasets
+core-pipeline/Dataset/*.jsonl
+core-pipeline/Dataset/*.json
+core-pipeline/Dataset/temp/
