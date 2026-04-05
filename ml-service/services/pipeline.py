@@ -24,7 +24,7 @@ def run_pipeline(problem, iterations=3):
 
         # only for coding tasks
         if code_mode:
-            passed, score, error = run_code(response)
+            passed, score, error = run_code(response, problem)
 
         history.append({
             "iteration": i + 1,
