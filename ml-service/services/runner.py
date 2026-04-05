@@ -21,6 +21,13 @@ def get_test_cases(problem):
             ((20, 10), 10),
             ((-1, 1), -2),
         ]
+    
+    elif "prime" in problem:
+        return [
+            (([2, 3, 4, 5],), [2, 3, 5]),
+            (([10, 11, 12, 13],), [11, 13]),
+            (([1, 6, 7, 9],), [7]),
+        ]
 
     return []
 
@@ -28,7 +35,7 @@ def get_test_cases(problem):
 def run_code(code, problem):
     try:
         local_env = {}
-        exec(code, {}, local_env)
+        exec(code, local_env)
 
         functions = [v for v in local_env.values() if callable(v)]
 
