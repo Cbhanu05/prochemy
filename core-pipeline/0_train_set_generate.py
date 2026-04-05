@@ -87,3 +87,57 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     main(args.output_path, args.total_tasks)
+
+def validate_sample(sample):
+    required_keys = {
+        "task_id",
+        "prompt",
+        "entry_point",
+        "canonical_solution",
+        "test",
+    }
+
+    if not required_keys.issubset(sample.keys()):
+        return False, "Missing required keys"
+
+    try:
+        compile(sample["prompt"], "<prompt>", "exec")
+        compile(sample["canonical_solution"], "<solution>", "exec")
+        compile(sample["test"], "<test>", "exec")
+    except Exception as e:
+        return False, f"Syntax error: {e}"
+
+    if f"def {sample['entry_point']}" not in sample["prompt"]:
+        return False, "Entry point mismatch"
+
+    test_asserts = sample["test"].count("assert")
+    if test_asserts < 2:
+        return False, "Weak tests"
+
+    return True, "Valid"
+
+
+def validate_dataset(input_path, output_path):
+    seen_prompts = set()
+    valid_samples = []
+
+    with open(input_path, "r", encoding="utf-8") as f:
+        for line in f:
+            sample = json.loads(line)
+
+            if sample["prompt"] in seen_prompts:
+                continue
+
+            is_valid, reason = validate_sample(sample)
+
+            if is_valid:
+                valid_samples.append(sample)
+                seen_prompts.add(sample["prompt"])
+
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+
+    with open(output_path, "w", encoding="utf-8") as f:
+        for sample in valid_samples:
+            f.write(json.dumps(sample) + "\n")
+
+    print(f"Validated samples: {len(valid_samples)} -> {output_path}")
