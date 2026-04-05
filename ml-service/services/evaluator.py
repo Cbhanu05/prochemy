@@ -20,4 +20,4 @@ Explain clearly:
 3. What is missing
 """
 
-    return call_model("mistral:7b", prompt)
+    return call_model("qwen2.5:3b", prompt)
